@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
 
+//TODO: validationları unutma
 @Component
 public class FriendRequestValidator {
     public void validate(@Valid FriendRequest friendRequest) {

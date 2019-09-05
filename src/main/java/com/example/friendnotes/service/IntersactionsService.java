@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.Valid;
 import java.util.Date;
 
+//TODO bu servisi bitirip controllerdan çağır
 @Service
 public class IntersactionsService {
 
