@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+//TODO: notes değil artık interaction olacak hepsi url ve methodlar
+//TODO: repository değil service'e gidicek
 @RestController
 @RequestMapping("/api")
 public class InstersactionsController {

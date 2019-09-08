@@ -11,6 +11,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
 
+//TODO: Entity ismi cogul olmaz. Interaction olcak Intersaction degil.
 @Entity
 @Table(name = "notes")
 @EntityListeners(AuditingEntityListener.class)
@@ -22,6 +23,7 @@ public class Intersactions implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //TODO Interaction'da name surname'e gerek yok. O bilgiler friend'ten gelicek zaten ilişki üzerinden. SİL!
     @NotBlank
     private String name ;
 
@@ -31,6 +33,7 @@ public class Intersactions implements Serializable {
     @NotBlank
     private String title;
 
+    //TODO content yerine artık o interactionla ilgili note kullabiliriz. Bu alanın ismi note olsun. Nullable bir alan olmalı
     @NotBlank
     private String content;
 
@@ -43,6 +46,10 @@ public class Intersactions implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     private Date updatedAt;
+
+    //TODO: Interaction'ın yapıldığı zaman dışardan alınabilir. interactionAt diye bir tarih daha ekleyelim. Not null bir alan olmalı
+
+    //TODO: Interaction'ın tipi olması lazım. Enum olucak: Örnek FACE_TO_FACE, PHONE_CALL. Not null bir alan olmalı.
 
     public Long getId() {
         return id;
