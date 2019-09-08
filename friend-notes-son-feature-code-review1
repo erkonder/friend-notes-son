@@ -1,0 +1,771 @@
+package com.example.friendnotes;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+@SpringBootApplication
+@EnableJpaAuditing
+public class FriendNotesApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(FriendNotesApplication.class, args);
+	}
+
+}
+
+
+package com.example.friendnotes.validator;
+
+import com.example.friendnotes.exception.FriendValidationException;
+import com.example.friendnotes.model.Friend;package com.example.friendnotes.service;
+
+import com.example.friendnotes.exception.ResourceNotFoundException;
+import com.example.friendnotes.model.Friend;
+import com.example.friendnotes.model.Interaction;
+import com.example.friendnotes.repository.FriendRepository;
+import com.example.friendnotes.request.FriendRequest;
+import com.example.friendnotes.response.FriendResponse;
+import com.example.friendnotes.validator.FriendRequestValidator;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import javax.validation.Valid;
+import java.util.Date;
+
+@Service
+public class FriendService {
+
+    private FriendRepository friendRepository;
+    private FriendRequestValidator friendRequestValidator;
+
+    public FriendService(FriendRepository friendRepository, FriendRequestValidator friendRequestValidator) {
+        this.friendRepository = friendRepository;
+        this.friendRequestValidator = friendRequestValidator;
+    }
+
+    public FriendResponse create(@Valid FriendRequest friendRequest) {
+        friendRequestValidator.validate(friendRequest);
+        Friend friend = saveFriend(friendRequest);
+        return convertResponse(friend);
+    }
+
+    private FriendResponse convertResponse(Friend friend) {
+        FriendResponse friendResponse = new FriendResponse();
+        friendResponse.setFriendId(friend.getId());
+        return friendResponse;
+    }
+
+    private Friend saveFriend(@Valid FriendRequest friendRequest) {
+        Friend friend = new Friend();
+        friend.setName(friendRequest.getName());
+        friend.setSurname(friendRequest.getSurname());
+        friend.setCreatedAt(new Date());
+        friendRepository.save(friend);
+        return friend;
+    }
+
+    public Friend get(@PathVariable Long friendId) {
+        return friendRepository.findById(friendId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend", "id", friendId));
+
+
+    }
+
+    public void delete(@PathVariable Long friendId) {
+        Friend friend = friendRepository.findById(friendId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend" , "friendId" , friendId));
+
+        friendRepository.delete(friend);
+
+
+    }
+
+    public void update(@PathVariable Long friendId) {
+        Friend friend = friendRepository.findById(friendId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend" , "friendId" , friendId));
+        Friend friendDetails = new Friend() ;
+        friend.setName(friendDetails.getName()) ;
+        friend.setSurname(friendDetails.getSurname());
+        friendRepository.save(friendDetails) ;
+
+    }
+}
+
+package com.example.friendnotes.service;
+
+
+import com.example.friendnotes.exception.ResourceNotFoundException;
+import com.example.friendnotes.model.Interaction;
+import com.example.friendnotes.repository.InteractionRepository;
+import com.example.friendnotes.request.InteractionRequest;
+import com.example.friendnotes.response.InteractionResponse;
+import com.example.friendnotes.validator.InteractionRequestValidator;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.validation.Valid;
+import java.util.Date;
+import java.util.List;
+
+//TODO bu servisi bitirip controllerdan çağır
+@Service
+public class InteractionService {
+
+    private InteractionRepository interactionRepository;
+    private InteractionRequestValidator interactionRequestValidator ;
+
+    public InteractionService(InteractionRepository interactionRepository, InteractionRequestValidator interactionRequestValidator) {
+        this.interactionRepository = interactionRepository;
+        this.interactionRequestValidator = interactionRequestValidator;
+    }
+    public List<Interaction> getAll()
+    {
+        return interactionRepository.findAll()  ;
+    }
+    public InteractionResponse create(@Valid InteractionRequest interactionRequest)
+    {
+        interactionRequestValidator.validate(interactionRequest);
+        Interaction interaction = saveInteraction(interactionRequest);
+        return  convertResponse(interaction);
+    }
+
+    private InteractionResponse convertResponse(Interaction interaction) {
+        InteractionResponse interactionResponse = new InteractionResponse();
+        interactionResponse.setInteractionid(interaction.getId());
+        return interactionResponse;
+    }
+
+    private Interaction saveInteraction(@Valid InteractionRequest interactionRequest) {
+        Interaction interaction = new Interaction();
+        interaction.setTitle(interactionRequest.getTitle());
+        interaction.setNote(interactionRequest.getNote());
+        interaction.setInteractionType(interactionRequest.getInteractionType());
+        interaction.setCreatedAt(new Date());
+        interactionRepository.save(interaction);
+        return interaction;
+    }
+
+
+    public Interaction get(@PathVariable Long interactionId)
+    {
+        return interactionRepository.findById(interactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interaction" , "id" , interactionId));
+
+
+
+
+    }
+
+
+    public void delete(@PathVariable  Long interactionId)
+    {
+        Interaction interaction = interactionRepository.findById(interactionId)
+                .orElseThrow(()-> new ResourceNotFoundException("Interaction" , "id" , interactionId));
+
+        interactionRepository.delete(interaction);
+
+
+
+    }
+
+    public Interaction update(@PathVariable Long interactionId)package com.example.friendnotes.response;
+
+public class FriendResponse {
+
+    private Long friendId;
+
+    public Long getFriendId() {
+        return friendId;
+    }
+
+    public void setFriendId(Long friendId) {
+        this.friendId = friendId;
+    }
+}
+
+package com.example.friendnotes.response;
+
+public class InteractionResponse {package com.example.friendnotes.request;
+
+public class FriendRequest {
+
+    private String name;
+    private String surname;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+}
+
+package com.example.friendnotes.request;
+
+import com.example.friendnotes.model.InteractionType;
+
+public class InteractionRequest {
+
+
+
+    private String name ;
+    private String surname ;
+    private String title ;
+    private String note;
+    private InteractionType interactionType ;
+
+    public InteractionType getInteractionType() {
+        return interactionType;
+    }
+
+    public void setInteractionType(InteractionType interactionType) {
+        this.interactionType = interactionType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+package com.example.friendnotes.repository;
+
+
+import com.example.friendnotes.model.Friend;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface FriendRepository extends JpaRepository<Friend, Long> {
+}
+
+package com.example.friendnotes.repository;
+
+import com.example.friendnotes.model.Interaction;package com.example.friendnotes.model;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
+
+@Entity
+@Table(name = "friend")
+@EntityListeners(AuditingEntityListener.class)
+public class Friend implements Serializable {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue
+    private long id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "surname", nullable = false)
+    private String surname;
+
+    @Column(name = "createdAt", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
+    private Date createdAt;
+
+    @Column(name = "updatedAt")
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    private Date updatedAt;
+
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}
+
+package com.example.friendnotes.model;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.lang.Nullable;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.util.Date;
+
+//TODO: Entity ismi cogul olmaz. Interaction olcak Intersaction degil.
+@Entity
+@Table(name = "interaction")
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
+        allowGetters = true)
+public class Interaction implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    //TODO Interaction'da name surname'e gerek yok. O bilgiler friend'ten gelicek zaten ilişki üzerinden. SİL!
+
+
+    @Column(name = "title" , nullable = false)
+    private String title;
+
+    //TODO content yerine artık o interactionla ilgili note kullabiliriz. Bu alanın ismi note olsun. Nullable bir alan olmalı
+    @Column(name = "note" , nullable = true)
+    private String note;
+
+    @Column(name = "createdAt" ,nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
+    private Date createdAt;
+
+    @Column(name = "updatedAt")
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    private Date updatedAt;
+
+
+
+    //TODO: Interaction'ın yapıldığı zaman dışardan alınabilir. interactionAt diye bir tarih daha ekleyelim. Not null bir alan olmalı
+    @Column(name = "interactionAt" ,nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
+    private Date interactionAt ;
+
+    //TODO: Interaction'ın tipi olması lazım. Enum olucak: Örnek FACE_TO_FACE, PHONE_CALL. Not null bir alan olmalı.
+
+
+    private InteractionType interactionType ;
+
+    public InteractionType getInteractionType(InteractionType interactionType) {
+        return this.interactionType;
+    }
+
+    public void setInteractionType(InteractionType interactionType) {
+        this.interactionType = interactionType;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;package com.example.friendnotes.exception;
+
+public class FriendValidationException extends RuntimeException {
+    public FriendValidationException(String s) {
+    }
+}
+
+package com.example.friendnotes.exception;
+
+public class InteractionValidationException extends RuntimeException {
+    public InteractionValidationException(String s)
+    {
+
+    }
+}
+
+package com.example.friendnotes.exception;
+
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+public class ResourceNotFoundException extends RuntimeException {
+
+    private String resourceName;
+    private String fieldName;
+    private Object fieldValue;
+
+    public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue) {
+        super(String.format("%s not found with %s : '%s'", resourceName, fieldName, fieldValue));
+        this.resourceName = resourceName;
+        this.fieldName = fieldName;
+        this.fieldValue = fieldValue;
+    }
+
+    public String getResourceName() {package com.example.friendnotes.controller;
+
+
+import com.example.friendnotes.model.Friend;
+import com.example.friendnotes.repository.FriendRepository;
+import com.example.friendnotes.request.FriendRequest;
+import com.example.friendnotes.response.FriendResponse;
+import com.example.friendnotes.service.FriendService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api")
+public class FriendController {
+
+    @Autowired
+    FriendRepository friendRepository;
+
+    @Autowired
+    FriendService friendService;
+
+    //Get All Friends
+    @GetMapping("/friend")
+    public List<Friend> getAllFriends() {
+        return friendRepository.findAll();
+    }
+
+    // Create a new Friend
+    @PostMapping("/friend")
+    public FriendResponse createFriend(@Valid @RequestBody FriendRequest friendRequest) {
+        return friendService.create(friendRequest);
+    }
+
+    // Get Single Friend
+    @GetMapping("/friend/{id}")
+    public Friend getFriend(@PathVariable(value = "id") Long friendId)
+
+
+    {
+        return  friendService.get(friendId);
+
+    }
+
+    @DeleteMapping("/friend/{id}")
+    public void deleteFriend(@PathVariable(value = "id") Long friendId)
+    {
+         friendService.delete(friendId) ;
+    }
+
+    @PutMapping("/friend/{id}")
+    public void updateFriend(@PathVariable(value = "id") Long friendId)
+    {
+        friendService.update(friendId) ;
+    }
+
+
+
+}
+
+package com.example.friendnotes.controller;
+
+
+import com.example.friendnotes.exception.ResourceNotFoundException;
+import com.example.friendnotes.model.Interaction;
+import com.example.friendnotes.repository.InteractionRepository;
+import com.example.friendnotes.request.InteractionRequest;
+import com.example.friendnotes.response.InteractionResponse;
+import com.example.friendnotes.service.InteractionService ;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+//TODO: notes değil artık interaction olacak hepsi url ve methodlar
+//TODO: repository değil service'e gidicek
+@RestController
+@RequestMapping("/api")
+public class InteractionController {
+
+    @Autowired
+    InteractionRepository interactionRepository;
+
+    @Autowired
+    InteractionService interactionService ;
+
+    // Get All Interactions
+    @GetMapping("/interaction")
+    public List<Interaction> getAllInteraction() {
+        return interactionService.getAll() ;
+    }
+
+    // Create a new Interaction
+    @PostMapping("/interaction")
+    public InteractionResponse createInteraction(@Valid @RequestBody InteractionRequest interactionRequest) {
+        return interactionService.create(interactionRequest);
+    }
+
+    // Get Single Interaction
+    @GetMapping("/interaction/{id}")
+    public Interaction getInteraction(@PathVariable(value = "id") Long interactionId)
+
+
+    {
+        return  interactionService.get(interactionId);
+
+    }
+
+    // Delete Interaction
+    @DeleteMapping("/interaction/{id}")
+    public void deleteInteraction(@PathVariable(value = "id") Long interactionId)
+    {
+         interactionService.delete(interactionId) ;
+    }
+
+    // Update Interaction
+    @PutMapping("/interaction/{id}")
+    public void updateInteraction(@PathVariable (value = "id") Long interactionId,
+                                  @RequestBody @Valid InteractionRequest interactionRequest)
+    {
+        interactionService.update(interactionId);
+    }
+
+
+
+
+
+
+
+
+
+}
+
+        return resourceName;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public Object getFieldValue() {
+        return fieldValue;
+    }
+}
+
+    }
+
+    public Date getInteractionAt() {
+        return interactionAt;
+    }
+
+    public void setInteractionAt(Date interactionAt) {
+        this.interactionAt = interactionAt;
+    }
+}
+
+package com.example.friendnotes.model;
+
+public enum InteractionType  {
+    FACE_TO_FACE,
+    PHONE_CALL
+}
+
+import com.example.friendnotes.request.InteractionRequest;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface InteractionRepository extends JpaRepository<Interaction, Long> {
+
+}
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+}
+
+
+    private Long Interactionid ;
+
+    public Long getInteractionid() {
+        return Interactionid;
+    }
+
+    public void setInteractionid(Long interactionid) {
+        Interactionid = interactionid;
+    }
+}
+
+
+    {
+
+
+     Interaction interaction = interactionRepository.findById(interactionId)
+             .orElseThrow(()-> new ResourceNotFoundException("Interaction" , "id" , interactionId));
+
+
+        Interaction interactionDetails = new Interaction();
+        interaction.setTitle(interactionDetails.getTitle());
+        interaction.setNote(interactionDetails.getNote());
+
+
+     Interaction updatedInteraction = interactionRepository.save(interaction) ;
+     return updatedInteraction ;
+    }
+}
+
+import com.example.friendnotes.request.FriendRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import javax.validation.Valid;
+
+//TODO: validationları unutma
+@Component
+public class FriendRequestValidator {
+    public void validate(@Valid FriendRequest friendRequest) {
+        if (StringUtils.isBlank(friendRequest.getName())) {
+            throw new FriendValidationException("name could not be blank");
+        }
+
+        //TODO : validate all fields
+
+        if (StringUtils.isBlank(friendRequest.getSurname()))
+        {
+            throw  new FriendValidationException("surname could not be blank");
+        }
+    }
+}
+
+package com.example.friendnotes.validator;
+
+
+import com.example.friendnotes.exception.InteractionValidationException;
+import com.example.friendnotes.request.InteractionRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import javax.validation.Valid;
+
+//TODO: validationları unutma
+@Component
+public class InteractionRequestValidator {
+    public void validate(@Valid InteractionRequest interactionRequest) {
+
+
+
+
+        if (StringUtils.isBlank(interactionRequest.getTitle()))
+        {
+            throw new InteractionValidationException("title could not be blank");
+        }
+
+        if(StringUtils.isBlank(interactionRequest.getNote()))
+        {
+            throw new InteractionValidationException("content could not be blank");
+        }
+
+
+
+
+
+
+    }
+}
